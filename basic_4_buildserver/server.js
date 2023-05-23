@@ -10,17 +10,27 @@ const EventEmitter = require('events');
 //customize the new emitter to create custom events like 'log'
 class MyEmitter extends EventEmitter {}
 const myEmitter = new MyEmitter();
-//listen for the event log
-// myEmitter.on('log', (msg) => logEvents(msg));
-// myEmitter.emit('log', 'Log even emitted');
 
 const serveFile = async (filePath, contentType, response) => {
   try {
-    const data = await fsPromises.readFile(filePath, 'utf8');
-    response.writeHead(200, { 'Content-Type': contentType });
-    response.end(data);
+    const rawData = await fsPromises.readFile(
+      filePath,
+      !contentType.includes('image') ? 'utf8' : '' //based on the below contentType categories,if the category is related to text, or css or js, than read it as 'utf8' format, otherwise, using the raw data like png format
+    );
+    //if the type is json format, it should turn to json format. if the type is css or txt, just ust txt format
+    const data =
+      contentType === 'application/json' ? JSON.parse(rawData) : rawData;
+
+    response.writeHead(filePath.includes('404.html') ? 404 : 200, {
+      'Content-Type': contentType,
+    });
+    // response.end(data); //I wonder why use Json.parse and stringify, prepare for the future operation to the data
+    response.end(
+      contentType === 'application/json' ? JSON.stringify(data) : data
+    );
   } catch (error) {
     console.log(error);
+    myEmitter.emit('log', `${error.name}\t${error.message}\n`, 'errLog.txt');
     response.statusCode = 500;
     response.end();
   }
@@ -30,6 +40,7 @@ const PORT = process.env.PORT || 3500;
 //create the server and set up the callback
 const server = http.createServer((req, res) => {
   // console.log(req.url, req.method);
+  myEmitter.emit('log', `${req.url}\t${req.method}`, 'reqLog.txt');
 
   // let filePath;
   // if (req.url === '/' || req.url === 'index.html') {
@@ -125,5 +136,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
+//listen for the event log,将这个放在服务器启动之前代表服务器启动后，已经设置好了对log的监听，服务器启动之前做好一切配置
+myEmitter.on('log', (msg, fileName) => logEvents(msg, fileName));
 //start the server and make a listen for incoming network connections on a specified port
 server.listen(PORT, () => console.log('Server running on ' + `${PORT}`));
