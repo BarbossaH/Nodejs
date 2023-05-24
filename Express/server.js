@@ -22,6 +22,32 @@ app.get('/old(.html)?', (req, res) => {
   res.redirect(301, '/new.html');
 });
 
+// the principle of middleware
+const stepOne = (req, res, next) => {
+  console.log(1);
+  next();
+};
+const stepTwo = (req, res, next) => {
+  console.log(2);
+  next();
+};
+const stepThree = (req, res, next) => {
+  console.log(3);
+  res.send('We finished three steps');
+};
+
+app.get(
+  '/hello(.html)?',
+  (req, res, next) => {
+    console.log('attempted to load hello.html');
+    next();
+  },
+  [stepOne, stepTwo, stepThree]
+  // (req, res) => {
+  //   res.send('Hello world');
+  // }
+);
+
 //if all url cannot access to any pages, then return 404page, which is default
 //but this place should be noticed because the app succeed to response a page named 404, so the default status code is 200, which is not we expect, it should be 404 status code, therefore we need to set the status code to 404
 app.get('/*', (req, res) => {
