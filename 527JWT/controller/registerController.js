@@ -24,6 +24,7 @@ const registerUser = async (req, res) => {
   //create the new user after check
   try {
     //encrypted the password
+    // console.log(typeof password, 12321321321);
     const encryptPwd = await bcrypt.hash(password, 10);
     //store username and pwd
     const newUser = { username: username, password: encryptPwd };

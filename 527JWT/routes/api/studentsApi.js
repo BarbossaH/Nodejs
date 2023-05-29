@@ -9,12 +9,16 @@ const {
   getStudentById,
 } = require('../../controller/stuController');
 
+const verifyJWT = require('../../middleware/verifyJWT');
+
 const stuData = {};
 stuData.students = require('../../model/students.json');
 
 // console.log(typeof stuData.students);
 
-router.route('/').get(getAllStudents).post(addStudent);
+//middleware function has four parameters, req, res, next, err. note the order of the parameters
+//get() function can have several function as middleware, note the order as well
+router.route('/').get(verifyJWT, getAllStudents).post(addStudent);
 
 router
   .route('/:id')
