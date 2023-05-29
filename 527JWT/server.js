@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const cors = require('cors');
+const verifyJWT = require('./middleware/verifyJWT');
 const corsOptions = require('./config/cors');
 const PORT = process.env.PORT || 3500;
 
@@ -25,10 +26,13 @@ app.use('/', express.static(path.join(__dirname, '/public')));
 // app.use('/subdir', express.static(path.join(__dirname, '/public')));
 
 //the first parameter is the bound path by router, this path will be combined with the path inside the router files to form the final address path
-app.use('/', require('./routes/root'));
-app.use('/register', require('./routes/api/registerApi'));
-app.use('/login', require('./routes/api/authApi'));
-app.use('/student', require('./routes/api/studentsApi'));
+app.use('/', require('./routes/root')); //home page doesn't need to check the auth
+app.use('/register', require('./routes/api/registerApi')); // register neither
+app.use('/login', require('./routes/api/authApi')); // login neither
+
+app.use(verifyJWT); //below this line, the following page need to check the auth
+
+app.use('/student', require('./routes/api/studentsApi')); //this page need check
 
 //if all url cannot access to any pages, then return 404page, which is default
 //but this place should be noticed because the app succeed to response a page named 404, so the default status code is 200, which is not we expect, it should be 404 status code, therefore we need to set the status code to 404

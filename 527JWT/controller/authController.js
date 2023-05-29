@@ -24,14 +24,14 @@ const authLogin = async (req, res) => {
       .status(400)
       .json({ message: 'Username and password are required' });
   //ensure the passed user exists
-  const theUser = userDB.users.find((user) => (user.username = username));
-  // console.log(theUser);
+  const theUser = userDB.users.find((user) => user.username === username);
+  console.log(theUser);
   if (!theUser) return res.sendStatus(401); //unauthorized
   //check the password
   // console.log(username, theUser.username);
   // console.log(typeof password, typeof theUser.password);
   const pwdChecked = await bcrypt.compare(password, theUser.password);
-  console.log(pwdChecked);
+  // console.log(pwdChecked);
   if (pwdChecked) {
     //authorized, and then generate the tokens
     //access token
@@ -47,7 +47,7 @@ const authLogin = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    console.log(accessToken, refreshToken);
+    // console.log(accessToken, refreshToken);
     //store the refresh token in database
     const restUsers = userDB.users.filter(
       (user) => user.username !== theUser.username
@@ -56,7 +56,7 @@ const authLogin = async (req, res) => {
     userDB.setUsers([...restUsers, theUserWithToken]);
     //after modify the data in cache, then write into the files
     await fsPromises.writeFile(
-      path.join(__dirname, '..', 'model', 'user.json'),
+      path.join(__dirname, '..', 'model', 'users.json'),
       JSON.stringify(userDB.users),
       'utf8',
       (err) => {

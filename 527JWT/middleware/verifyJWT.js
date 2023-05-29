@@ -6,7 +6,7 @@ const verifyToken = (req, res, next) => {
   // console.log(req.username, 'if it exists');
   // console.log('verify token');
   const authHeader = req.headers['authorization'];
-  console.log(authHeader);
+  // console.log(authHeader);
   if (!authHeader) return res.sendStatus(401);
   // console.log(authHeader); // to show the format of the header
   const token = authHeader.split(' ')[1]; // Bearer refresh token
