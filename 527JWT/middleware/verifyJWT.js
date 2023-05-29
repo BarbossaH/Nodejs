@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       // console.log('Iamcoming');
-      return res.sendStatus(403); //forbid
+      return res.sendStatus(403); //forbidden
     }
 
     //if succeeding, the decoded will contain the jwt's payload, in the auth controller, the payload is username

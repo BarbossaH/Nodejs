@@ -2,7 +2,9 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const cors = require('cors');
+const refreshToken = require('./');
 const verifyJWT = require('./middleware/verifyJWT');
+const cookieParser = require('cookie-parser');
 const corsOptions = require('./config/cors');
 const PORT = process.env.PORT || 3500;
 
@@ -19,6 +21,9 @@ app.use(express.urlencoded({ extended: false }));
 //built-in middleware for json
 app.use(express.json());
 
+//middleware for cookies
+app.use(cookieParser());
+
 //serve static file, if not using this section of code, the css and img file cannot be loaded
 // app.use(express.static(path.join(__dirname, '/public'))); //the first parameter has default value '/'
 app.use('/', express.static(path.join(__dirname, '/public')));
@@ -29,6 +34,7 @@ app.use('/', express.static(path.join(__dirname, '/public')));
 app.use('/', require('./routes/root')); //home page doesn't need to check the auth
 app.use('/register', require('./routes/api/registerApi')); // register neither
 app.use('/login', require('./routes/api/authApi')); // login neither
+app.use('/refresh', require('./routes/api/refreshTokenApi'));
 
 app.use(verifyJWT); //below this line, the following page need to check the auth
 

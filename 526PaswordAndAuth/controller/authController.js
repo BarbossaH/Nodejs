@@ -1,8 +1,8 @@
 //compare the request data with the DB
 const usersDB = {
   users: require('../model/users.json'),
-  setUsers: function (data) {
-    this.users = data;
+  setUsers: function (users) {
+    this.users = users;
   },
 };
 

@@ -5,7 +5,7 @@
 const userDB = {
   users: require('../model/users.json'),
   setUsers: function (data) {
-    this.data = data;
+    this.users = data;
   },
 };
 
@@ -31,7 +31,7 @@ const authLogin = async (req, res) => {
   // console.log(username, theUser.username);
   // console.log(typeof password, typeof theUser.password);
   const pwdChecked = await bcrypt.compare(password, theUser.password);
-  // console.log(pwdChecked);
+  console.log(pwdChecked);
   if (pwdChecked) {
     //authorized, and then generate the tokens
     //access token
@@ -52,8 +52,14 @@ const authLogin = async (req, res) => {
     const restUsers = userDB.users.filter(
       (user) => user.username !== theUser.username
     );
+    console.log(restUsers);
     const theUserWithToken = { ...theUser, refreshToken };
-    userDB.setUsers([...restUsers, theUserWithToken]);
+    // console.log(theUserWithToken);
+    const data = [...restUsers, theUserWithToken];
+    // console.log(data, 321323223132);
+    // userDB.setUsers([...restUsers, theUserWithToken]);
+    userDB.setUsers(data);
+    // console.log(userDB.users, '999999999');
     //after modify the data in cache, then write into the files
     await fsPromises.writeFile(
       path.join(__dirname, '..', 'model', 'users.json'),
