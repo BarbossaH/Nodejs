@@ -72,7 +72,10 @@ const authLogin = async (req, res) => {
     //we will sent two tokens separately
     res.cookie('jwt', refreshToken, {
       httpOnly: true, //the value of true means the refresh token only can be transferred in http header
+      sameSite: 'None', //allow cross site request
+      secure: true, //allow to use https to transfer data
       maxAge: 24 * 60 * 60 * 1000,
+      //show add something else
     });
     res.json({ accessToken });
   } else {

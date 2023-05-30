@@ -13,9 +13,9 @@ const jwt = require('jsonwebtoken');
 //this place we don't need to use async function to read or write files or check the password with bcript
 const refreshTokenHandler = (req, res) => {
   const cookies = req.cookies;
-  console.log(cookies);
+  console.log(req);
   if (!cookies.jwt) return res.sendStatus(401);
-  console.log(cookies?.jwt);
+  // console.log(cookies?.jwt);
   const refreshToken = cookies.jwt;
   //based on refresh token to find the user because we saved the refresh token before
   const theUser = userDB.users.find(

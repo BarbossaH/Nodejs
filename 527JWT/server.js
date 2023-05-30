@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const credentials = require('./middleware/credentials');
 const cors = require('cors');
-const refreshToken = require('./');
 const verifyJWT = require('./middleware/verifyJWT');
 const cookieParser = require('cookie-parser');
 const corsOptions = require('./config/cors');
@@ -11,6 +11,9 @@ const PORT = process.env.PORT || 3500;
 const logger = require('./middleware/logger');
 const errLog = require('./middleware/errlog');
 app.use(logger);
+
+//set up credential before cors, and fetch cookies credentials requirement
+app.use(credentials);
 
 app.use(cors(corsOptions));
 //built-in middleware to handle urlencoded data(form data)
@@ -35,6 +38,7 @@ app.use('/', require('./routes/root')); //home page doesn't need to check the au
 app.use('/register', require('./routes/api/registerApi')); // register neither
 app.use('/login', require('./routes/api/authApi')); // login neither
 app.use('/refresh', require('./routes/api/refreshTokenApi'));
+app.use('/logout', require('./routes/api/logoutApi'));
 
 app.use(verifyJWT); //below this line, the following page need to check the auth
 
