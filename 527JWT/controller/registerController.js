@@ -27,13 +27,17 @@ const registerUser = async (req, res) => {
     // console.log(typeof password, 12321321321);
     const encryptPwd = await bcrypt.hash(password, 10);
     //store username and pwd
-    const newUser = { username: username, password: encryptPwd };
+    const newUser = {
+      username: username,
+      roles: { User: 369 },
+      password: encryptPwd,
+    };
     usersDB.setUsers([...usersDB.users, newUser]);
     await fsPromise.writeFile(
       path.join(__dirname, '..', 'model', 'users.json'),
       JSON.stringify(usersDB.users)
     );
-    console.log(usersDB.users);
+    // console.log(usersDB.users);
     res.status(201).json({ success: 'New user' + `${username} created` });
   } catch (error) {
     res.status(500).json({ message: error.message });

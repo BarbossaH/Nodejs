@@ -31,18 +31,29 @@ const authLogin = async (req, res) => {
   // console.log(username, theUser.username);
   // console.log(typeof password, typeof theUser.password);
   const pwdChecked = await bcrypt.compare(password, theUser.password);
-  console.log(pwdChecked);
+  // console.log(pwdChecked);
   if (pwdChecked) {
     //authorized, and then generate the tokens
-    //access token
+    //access token, and set user information as the payload
+    const roles = Object.values(theUser.roles);
     const accessToken = jwt.sign(
-      { username: theUser.username },
+      {
+        userInfo: {
+          username: theUser.username,
+          roles,
+        },
+      },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: '180s' }
     );
     //refresh token
     const refreshToken = jwt.sign(
-      { username: theUser.username },
+      {
+        userInfo: {
+          username: theUser.username,
+          roles,
+        },
+      },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: '1d' }
     );
@@ -52,7 +63,7 @@ const authLogin = async (req, res) => {
     const restUsers = userDB.users.filter(
       (user) => user.username !== theUser.username
     );
-    console.log(restUsers);
+    // console.log(restUsers);
     const theUserWithToken = { ...theUser, refreshToken };
     // console.log(theUserWithToken);
     const data = [...restUsers, theUserWithToken];

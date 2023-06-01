@@ -16,7 +16,7 @@ const path = require('path');
 const logoutHandler = async (req, res) => {
   //get the cookie because jwt saved in cookie
   const cookies = req.cookies;
-  console.log(req, cookies, 'we just need to inspect req');
+  // console.log(cookies, 'we just need to inspect req');
   //in some special cases, the refreshtoken doesn't exist. and once it is lost, server doesn't need to do anything
   if (!cookies?.jwt) return res.sendStatus(204); //Not content to return。
   const refreshToken = cookies.jwt; //note jwt sometimes could be other value.here we design it as refresh token
@@ -24,9 +24,15 @@ const logoutHandler = async (req, res) => {
   const theUser = userDB.users.find(
     (user) => user.refreshToken === refreshToken
   );
+  console.log(theUser);
   //not in db
   if (!theUser) {
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true }); //clear the cookie in the frontend
+    res.clearCookie('jwt', {
+      httpOnly: true,
+      sameSite: 'None',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    }); //clear the cookie in the frontend
     return res.sendStatus(204);
   }
   //if the user exists, delete the token from database and frontend
@@ -35,11 +41,18 @@ const logoutHandler = async (req, res) => {
   );
   const theUserWithoutToken = { ...theUser, refreshToken: '' };
   userDB.setUsers([...restUsers, theUserWithoutToken]);
+  // console.log(userDB.users, 'rewrite the users.json');
+
   await fsPromises.writeFile(
     path.join(__dirname, '..', 'model', 'users.json'),
     JSON.stringify(userDB.users)
   );
-  res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+  });
   // res.json({ message: 'exactly' });
   res.sendStatus(204);
 };

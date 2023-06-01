@@ -34,12 +34,18 @@ const refreshTokenHandler = (req, res) => {
     }
     // console.log(decoded, theUser, 'just for log');
     //create a new access token after verification
+    const roles = Object.values(theUser.roles);
     const accessToken = jwt.sign(
-      { username: decoded.username },
+      {
+        userInfo: {
+          username: decoded.username,
+          roles,
+        },
+      },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: '180s' }
     );
-    console.log(accessToken, 'we did it');
+    // console.log(accessToken, 'we did it');
     return res.json({ accessToken });
   });
 };
