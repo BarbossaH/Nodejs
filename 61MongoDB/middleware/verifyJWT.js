@@ -1,6 +1,6 @@
 //verify the token, based on the data in the request header
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+
 const verifyToken = (req, res, next) => {
   // console.log(req.username, 'if it exists');
   // console.log('verify token');
