@@ -1,9 +1,4 @@
-const stuData = {
-  students: require('../model/students.json'),
-  setStudents: function (data) {
-    this.students = data;
-  },
-};
+const StudentModel = require('../model/StudentSchema');
 
 const getAllStudents = (req, res) => {
   res.json(stuData.students);

@@ -2,7 +2,7 @@ const { default: mongoose } = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const childrenSchema = new Schema({
+const studentSchema = new Schema({
   firstname: {
     type: String,
     required: true,
@@ -13,4 +13,4 @@ const childrenSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('Children', childrenSchema);
+module.exports = mongoose.model('Student', studentSchema);
