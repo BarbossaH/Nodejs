@@ -8,8 +8,6 @@ const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const fsPromises = require('fs').promises;
-const path = require('path');
 
 const authLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -20,7 +18,7 @@ const authLogin = async (req, res) => {
       .json({ message: 'Username and password are required' });
   //ensure the passed user exists
   const theUser = await User.findOne({ username }).exec();
-  console.log(theUser);
+  // console.log(theUser);
   if (!theUser) return res.sendStatus(401); //unauthorized
   //check the password
   // console.log(username, theUser.username);
@@ -39,7 +37,7 @@ const authLogin = async (req, res) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '180s' }
+      { expiresIn: '1d' }
     );
     //refresh token
     const refreshToken = jwt.sign(
@@ -57,7 +55,7 @@ const authLogin = async (req, res) => {
     //store the refresh token in database
     theUser.refreshToken = refreshToken;
     const result = await theUser.save();
-    console.log(result);
+    // console.log(result);
 
     //we will sent two tokens separately
     res.cookie('jwt', refreshToken, {

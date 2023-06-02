@@ -29,7 +29,7 @@ const registerUser = async (req, res) => {
     };
 
     const result = await User.create(newUser);
-    console.log(result);
+    // console.log(result);
     // console.log(usersDB.users);
     res.status(201).json({ success: 'New user' + `${username} created` });
   } catch (error) {

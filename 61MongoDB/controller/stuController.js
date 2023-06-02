@@ -1,82 +1,78 @@
 const StudentModel = require('../model/StudentSchema');
 
-const getAllStudents = (req, res) => {
-  res.json(stuData.students);
+const getAllStudents = async (req, res) => {
+  const students = await StudentModel.find();
+  if (!students) return res.status(204).json({ message: 'No students exist' });
+  res.json(students);
 };
 
-const getStudentById = (req, res) => {
-  const stuId = parseInt(req.params.id);
-  const student = stuData.students.find((student) => student.id === stuId);
+const getStudentById = async (req, res) => {
+  const stuId = parseInt(req?.params?.id);
+  if (!stuId) return res.status(400).json({ message: 'Id is required' });
+  const student = await StudentModel.findOne({ _id: stuId }).exec();
   if (!student) {
-    res.status(400).json({ message: `student ${stuId} doesn't exist` });
+    res.status(204).json({ message: `student ${stuId} doesn't exist` });
   } else {
     res.status(201).json(student);
   }
 };
 
-const deleteStudentById = (req, res) => {
-  const stuId = parseInt(req.params.id);
-  const student = stuData.students.find((student) => student.id === stuId);
+const deleteStudentById = async (req, res) => {
+  const stuId = req?.params?.id;
+  if (!stuId)
+    return res.status(400).json({ message: 'Student Id is necessary!' });
+  const student = await StudentModel.findOne({ _id: stuId }).exec();
   if (!student) {
-    res.status(400).json({ message: `student ${stuId} doesn't exist` });
+    res.status(204).json({ message: `student ${stuId} doesn't exist` });
   }
-  const filteredStu = stuData.students.filter(
-    (student) => student.id !== stuId
-  );
-  stuData.setStudents(filteredStu);
-  // stuData.setStudents([...filteredStu]);
-  res.status(201).json(stuData.students);
+  const result = await student.deleteOne({ _id: stuId });
+  res.status(201).json(result);
 };
 
-const addStudent = (req, res) => {
-  const newFirstName = req.body.firstname;
-  const newLastName = req.body.lastname;
+const addStudent = async (req, res) => {
+  const newFirstName = req?.body?.firstname;
+  const newLastName = req?.body?.lastname;
   if (!newFirstName || !newLastName)
     return res
       .status(400)
       .json({ message: 'First and last name are necessary!' });
 
-  console.log(stuData.students[stuData.students.length - 1]);
-  const newStu = {
-    id: stuData.students.length //even stuData.students has no any student, it won't be false
-      ? stuData.students[stuData.students.length - 1].id + 1
-      : 1,
-    firstname: newFirstName,
-    lastname: newLastName,
-  };
+  try {
+    const result = await StudentModel.create({
+      firstname: newFirstName,
+      lastname: newLastName,
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    console.error(error);
+  }
+
   //add save the new student to the students array, and then response
-  stuData.setStudents([...stuData.students, newStu]);
-  res.status(201).json(stuData.students);
 };
 
-const updateStudent = (req, res) => {
+const updateStudent = async (req, res) => {
   // console.log(req.params.id);
-  const stuId = parseInt(req.params.id);
-  const student = stuData.students.find((student) => {
-    // console.log(student.id);
-    return student.id === stuId;
-  });
+  const stuId = req?.params?.id;
+  console.log(stuId);
+  if (!stuId) {
+    return res.status(400).json({ message: 'Id parameter is required' });
+  }
+  const student = await StudentModel.findOne({ _id: stuId }).exec();
   if (!student) {
     return res.status(400).json({ message: `Student ${stuId} doesn't exist` });
   }
   //update the every detail from the new data
-  const newFirstName = req.body.firstname;
-  const newLastName = req.body.lastname;
+  const newFirstName = req?.body?.firstname;
+  const newLastName = req?.body?.lastname;
   if (newFirstName) {
     student.firstname = newFirstName;
   }
   if (newLastName) {
     student.lastname = newLastName;
   }
-  //get the rest students array
-  const filteredStu = stuData.students.filter((stu) => stu.id !== student.id);
-  //add the updated student data to the filtered students
-  const unsortedStu = [...filteredStu, student];
-  //sort the unsortedStu according to id, the bigger one is behind
-  const sortedStudents = unsortedStu.sort((a, b) => a.id - b.id);
-  stuData.setStudents(sortedStudents);
-  // res.status(201).json(sortedStudents);
-  res.status(201).json(stuData.students);
+  const result = await student.save();
+  res.status(201).json(result);
 };
 
 module.exports = {

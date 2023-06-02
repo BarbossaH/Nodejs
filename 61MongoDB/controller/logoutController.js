@@ -31,7 +31,7 @@ const logoutHandler = async (req, res) => {
   //if the user exists, delete the token from database and frontend
   theUser.refreshToken = '';
   const result = await theUser.save();
-  console.log(result);
+  // console.log(result);
   // console.log(userDB.users, 'rewrite the users.json');
 
   res.clearCookie('jwt', {
