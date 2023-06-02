@@ -4,12 +4,7 @@
  * payload before.
  */
 
-const userDB = {
-  users: require('../model/users.json'),
-  setUsers: function (users) {
-    this.users = users;
-  },
-};
+const User = require('../model/UserSchema');
 const fsPromises = require('fs').promises;
 const path = require('path');
 
@@ -21,9 +16,7 @@ const logoutHandler = async (req, res) => {
   if (!cookies?.jwt) return res.sendStatus(204); //Not content to return。
   const refreshToken = cookies.jwt; //note jwt sometimes could be other value.here we design it as refresh token
   // via refreshtoken to find the corresponding user
-  const theUser = userDB.users.find(
-    (user) => user.refreshToken === refreshToken
-  );
+  const theUser = await User.findOne({ refreshToken }).exec(); // the User is a mongoose Query object
   console.log(theUser);
   //not in db
   if (!theUser) {
@@ -32,21 +25,15 @@ const logoutHandler = async (req, res) => {
       sameSite: 'None',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
-    }); //clear the cookie in the frontend
+    }); //clear the cookie in the frontend as well
     return res.sendStatus(204);
   }
   //if the user exists, delete the token from database and frontend
-  const restUsers = userDB.users.filter(
-    (user) => user.refreshToken !== theUser.username
-  );
-  const theUserWithoutToken = { ...theUser, refreshToken: '' };
-  userDB.setUsers([...restUsers, theUserWithoutToken]);
+  theUser.refreshToken = '';
+  const result = await theUser.save();
+  console.log(result);
   // console.log(userDB.users, 'rewrite the users.json');
 
-  await fsPromises.writeFile(
-    path.join(__dirname, '..', 'model', 'users.json'),
-    JSON.stringify(userDB.users)
-  );
   res.clearCookie('jwt', {
     httpOnly: true,
     sameSite: 'None',

@@ -2,12 +2,7 @@
  * through checking username and password, and then generate refresh-token and access token,after that, we send them to the front end
  */
 
-const userDB = {
-  users: require('../model/users.json'),
-  setUsers: function (data) {
-    this.users = data;
-  },
-};
+const User = require('../model/UserSchema');
 
 const bcrypt = require('bcrypt');
 
@@ -24,7 +19,7 @@ const authLogin = async (req, res) => {
       .status(400)
       .json({ message: 'Username and password are required' });
   //ensure the passed user exists
-  const theUser = userDB.users.find((user) => user.username === username);
+  const theUser = await User.findOne({ username }).exec();
   console.log(theUser);
   if (!theUser) return res.sendStatus(401); //unauthorized
   //check the password
@@ -60,31 +55,15 @@ const authLogin = async (req, res) => {
 
     // console.log(accessToken, refreshToken);
     //store the refresh token in database
-    const restUsers = userDB.users.filter(
-      (user) => user.username !== theUser.username
-    );
-    // console.log(restUsers);
-    const theUserWithToken = { ...theUser, refreshToken };
-    // console.log(theUserWithToken);
-    const data = [...restUsers, theUserWithToken];
-    // console.log(data, 321323223132);
-    // userDB.setUsers([...restUsers, theUserWithToken]);
-    userDB.setUsers(data);
-    // console.log(userDB.users, '999999999');
-    //after modify the data in cache, then write into the files
-    await fsPromises.writeFile(
-      path.join(__dirname, '..', 'model', 'users.json'),
-      JSON.stringify(userDB.users),
-      'utf8',
-      (err) => {
-        if (err) console.error('Error writing json file', err);
-      }
-    );
+    theUser.refreshToken = refreshToken;
+    const result = await theUser.save();
+    console.log(result);
+
     //we will sent two tokens separately
     res.cookie('jwt', refreshToken, {
       httpOnly: true, //the value of true means the refresh token only can be transferred in http header
       sameSite: 'None', //allow cross site request
-      secure: true, //allow to use https to transfer data
+      // secure: true, //only allow to use https to transfer data, if http, the cookie won't be sent
       maxAge: 24 * 60 * 60 * 1000,
       //show add something else
     });
